@@ -97,11 +97,37 @@ Antes de publicar cambios, compruebe que `.env` no aparece en `git status`. La r
 
 Las contraseñas se almacenan con `password_hash()`. Las consultas con datos de usuario usan sentencias preparadas; los formularios POST incluyen protección CSRF y las páginas administrativas verifican la sesión.
 
+### Datos de demostración
+
+Después de importar `database.sql`, puede importar [seed_demo.sql](seed_demo.sql) para agregar cuatro empleados ficticios y cuatro turnos de ejemplo. Hay entradas y salidas de hoy, una entrada abierta y un turno de ayer. Repetir la carga el mismo día no duplica esas filas; ejecutarla otro día agrega turnos para la nueva fecha. No cambia administradores ni empleados existentes.
+
+| Cédula | Empleado | Código | Estado |
+| --- | --- | --- | --- |
+| `9-9000-0001` | Ana Solís | `A7F294` | Activo |
+| `9-9000-0002` | Carlos Rojas | `B8C315` | Activo |
+| `9-9000-0003` | Lucía Mora | `C2D674` | Activo |
+| `9-9000-0004` | Marco Vargas | `D9E803` | Inactivo |
+
+En **PowerShell con XAMPP**, desde la carpeta del proyecto (MySQL pedirá la contraseña):
+
+```powershell
+& "C:\xampp\mysql\bin\mysql.exe" -u root -p -e "source seed_demo.sql"
+```
+
+En macOS o Linux con `mysql` en el PATH:
+
+```bash
+mysql -u root -p < seed_demo.sql
+```
+
+Los turnos se generan con `CURDATE()` del servidor MySQL; configure su zona horaria para que coincida con `APP_TIMEZONE` si el servidor está en otra región. Cree el primer administrador desde `instalar.php` cuando la tabla `usuarios` esté vacía.
+
 ## Archivos principales
 
 | Archivo | Propósito |
 | --- | --- |
 | `database.sql` | Crea la base nueva y las tablas `usuarios`, `empleados`, `asistencias` |
+| `seed_demo.sql` | Carga empleados y turnos ficticios para demostración |
 | `.env.example` | Plantilla de configuración sin credenciales |
 | `instalar.php`, `login.php`, `logout.php` | Alta inicial y acceso administrativo |
 | `index.php` | Marcación pública |
