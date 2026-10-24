@@ -1,0 +1,7 @@
+Options -Indexes
+<FilesMatch "^(\.env|\.env\.example|database\.sql|README\.md|\.gitignore|\.htaccess|router\.php)$">
+    Require all denied
+</FilesMatch>
+RewriteEngine On
+RewriteRule ^includes/ - [F,L]
+

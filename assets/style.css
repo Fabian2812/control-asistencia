@@ -1,0 +1,20 @@
+:root { --ink: #16243a; --nav: #102f49; --accent: #087e8b; --paper: #f4f7fa; }
+body { min-height: 100vh; background: var(--paper); color: var(--ink); }
+.app-nav { background: var(--nav); box-shadow: 0 2px 12px #11283a20; }
+.navbar-brand { letter-spacing: .02em; }
+.page-title { font-weight: 750; letter-spacing: -.035em; }
+.card { border: 1px solid #e2eaf0; border-radius: 1rem; box-shadow: 0 10px 25px #1631490a; }
+.card-header { border-bottom: 1px solid #e2eaf0; background: #fff; border-radius: 1rem 1rem 0 0 !important; }
+.stat-card { border-left: 4px solid var(--accent); }
+.stat-number { font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 750; line-height: 1.1; }
+.btn-primary { background: var(--accent); border-color: var(--accent); }
+.btn-primary:hover, .btn-primary:focus { background: #066875; border-color: #066875; }
+.form-control:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 .2rem #087e8b30; }
+.table thead th { color: #4c6072; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.table > :not(caption) > * > * { padding: .85rem .75rem; vertical-align: middle; }
+.hero-card { background: linear-gradient(125deg, #103a57, #086f7e); color: #fff; }
+.hero-card .card-body { padding: clamp(1.5rem, 4vw, 3rem); }
+.mark-result { border-left: 5px solid var(--accent); }
+.code-text { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .1em; }
+.max-form { max-width: 580px; }
+@media (max-width: 575.98px) { .actions { display: grid; gap: .4rem; } .actions .btn { width: 100%; } }
