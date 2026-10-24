@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
 require_admin();
+// Calcula indicadores diarios y totales a partir de empleados y asistencias.
 $today = date('Y-m-d');
 $stats = [
     'total' => (int)db()->query('SELECT COUNT(*) FROM empleados')->fetchColumn(),
@@ -11,9 +12,11 @@ $stmt = db()->prepare('SELECT COUNT(DISTINCT empleado_id) FROM asistencias WHERE
 $stmt->execute([$today]);
 $stats['ingresaron'] = (int)$stmt->fetchColumn();
 $stats['dentro'] = (int)db()->query('SELECT COUNT(DISTINCT a.empleado_id) FROM asistencias a JOIN empleados e ON e.id = a.empleado_id WHERE a.hora_salida IS NULL AND e.estado = 1')->fetchColumn();
+// Cada entrada cuenta como una marcación; una salida registrada suma otra.
 $stmt = db()->prepare('SELECT COALESCE(SUM(1 + (hora_salida IS NOT NULL)), 0) FROM asistencias WHERE fecha = ?');
 $stmt->execute([$today]);
 $stats['registros'] = (int)$stmt->fetchColumn();
+// Limita la tabla inicial a los ocho turnos más recientes del día.
 $stmt = db()->prepare('SELECT a.fecha, a.hora_entrada, a.hora_salida, e.nombre, e.cedula FROM asistencias a JOIN empleados e ON e.id = a.empleado_id WHERE a.fecha = ? ORDER BY a.hora_entrada DESC LIMIT 8');
 $stmt->execute([$today]);
 $recent = $stmt->fetchAll();

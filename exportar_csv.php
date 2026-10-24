@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/includes/asistencia_query.php';
 require_admin();
+// Reutiliza los mismos filtros del historial para exportar exactamente esa selección.
 [, $errors, $where, $params] = attendance_filters($_GET);
 if ($errors) {
     http_response_code(400);
@@ -9,6 +10,7 @@ if ($errors) {
 }
 $stmt = db()->prepare('SELECT a.fecha, a.hora_entrada, a.hora_salida, e.nombre, e.cedula FROM asistencias a JOIN empleados e ON e.id = a.empleado_id' . $where . ' ORDER BY a.fecha DESC, a.hora_entrada DESC, a.id DESC');
 $stmt->execute($params);
+// Envía un CSV con BOM UTF-8 y separador punto y coma para abrirlo en Excel.
 header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="asistencias-' . date('Y-m-d') . '.csv"');
 header('Cache-Control: no-store');
@@ -16,7 +18,7 @@ $output = fopen('php://output', 'w');
 fwrite($output, "\xEF\xBB\xBF");
 fputcsv($output, ['Cédula', 'Empleado', 'Fecha', 'Entrada', 'Salida', 'Horas trabajadas'], ';');
 while ($row = $stmt->fetch()) {
-    // Evita que Excel interprete datos de usuarios como fórmulas.
+    // La función local antepone un apóstrofo a posibles fórmulas de hoja de cálculo.
     $safe = static fn(string $value): string => preg_match('/^[\s]*[=+@-]/u', $value) ? "'" . $value : $value;
     fputcsv($output, [
         $safe($row['cedula']),

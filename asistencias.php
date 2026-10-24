@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
 require_once __DIR__ . '/includes/asistencia_query.php';
 require_admin();
+// Comparte validación de filtros con la exportación para obtener los mismos datos.
 [$filters, $errors, $where, $params] = attendance_filters($_GET);
 $page = filter_var($_GET['pagina'] ?? 1, FILTER_VALIDATE_INT);
 $page = $page && $page > 0 ? $page : 1;
@@ -10,6 +11,7 @@ $perPage = 50;
 $total = 0;
 $rows = [];
 if (!$errors) {
+    // Cuenta todas las coincidencias y consulta solo 50 filas para esta página.
     $from = ' FROM asistencias a JOIN empleados e ON e.id = a.empleado_id';
     $stmt = db()->prepare('SELECT COUNT(*)' . $from . $where);
     $stmt->execute($params);
@@ -21,6 +23,7 @@ if (!$errors) {
     $stmt->execute($params);
     $rows = $stmt->fetchAll();
 }
+// La función anónima omite filtros vacíos al formar el enlace de exportación.
 $query = http_build_query(array_filter($filters, static fn($v) => $v !== ''));
 page_start('Historial de asistencia', true);
 ?>

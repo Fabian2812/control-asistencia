@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
 require_admin();
+// POST cambia únicamente el estado del empleado indicado y luego redirige.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
@@ -15,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     redirect('empleados.php');
 }
+// Los filtros opcionales usan parámetros PDO y limitan la lista a 500 filas.
 $buscar = trim((string)($_GET['buscar'] ?? ''));
 $estado = (string)($_GET['estado'] ?? 'todos');
 $where = [];

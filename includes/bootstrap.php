@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-// Archivo compartido por todas las páginas. El .env nunca se publica en Git.
+// Carga la configuración local sin reemplazar variables definidas por el servidor.
+// El .env contiene secretos y nunca se publica en Git.
 $envFile = dirname(__DIR__) . '/.env';
 if (is_file($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
@@ -25,8 +26,10 @@ if (is_file($envFile)) {
     }
 }
 
+// La misma zona horaria se usa para registrar y presentar cada asistencia.
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'America/Costa_Rica');
 
+// Inicializa una sesión con cookie protegida para autenticación, avisos y CSRF.
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_save_path(getenv('SESSION_SAVE_PATH') ?: sys_get_temp_dir());
     session_name('asistencia_sesion');
@@ -39,6 +42,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+/** Crea una sola conexión PDO por petición con consultas preparadas reales. */
 function db(): PDO
 {
     static $connection = null;
@@ -59,11 +63,13 @@ function db(): PDO
     return $connection;
 }
 
+/** Escapa texto antes de insertarlo en HTML para evitar inyección de etiquetas. */
 function e(mixed $value): string
 {
     return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/** Obtiene o crea el token aleatorio asociado a la sesión actual. */
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf_token'])) {
@@ -72,11 +78,13 @@ function csrf_token(): string
     return $_SESSION['csrf_token'];
 }
 
+/** Devuelve el campo oculto que protege los formularios POST contra CSRF. */
 function csrf_field(): string
 {
     return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';
 }
 
+/** Rechaza una solicitud POST si su token no corresponde a la sesión. */
 function verify_csrf(): void
 {
     $received = $_POST['csrf_token'] ?? '';
@@ -86,6 +94,7 @@ function verify_csrf(): void
     }
 }
 
+/** Exige una sesión administrativa y confirma que el usuario siga activo. */
 function require_admin(): void
 {
     if (empty($_SESSION['admin_id'])) {
@@ -101,11 +110,13 @@ function require_admin(): void
     }
 }
 
+/** Guarda un aviso de una sola lectura para mostrarlo después de redirigir. */
 function flash(string $type, string $message): void
 {
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
 
+/** Entrega y elimina el aviso pendiente de la sesión. */
 function take_flash(): ?array
 {
     $message = $_SESSION['flash'] ?? null;
@@ -113,28 +124,33 @@ function take_flash(): ?array
     return $message;
 }
 
+/** Envía una redirección 303 para evitar repetir un POST al actualizar. */
 function redirect(string $path): never
 {
     header('Location: ' . $path, true, 303);
     exit;
 }
 
+/** Comprueba que una fecha exista y esté escrita como AAAA-MM-DD. */
 function valid_date(string $value): bool
 {
     $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
     return $date !== false && $date->format('Y-m-d') === $value;
 }
 
+/** Presenta una fecha como DD/MM/AAAA o un guion si no existe. */
 function date_view(?string $value): string
 {
     return $value ? (new DateTimeImmutable($value))->format('d/m/Y') : '—';
 }
 
+/** Presenta la hora en formato de 12 horas con AM/PM. */
 function time_view(?string $value): string
 {
     return $value ? (new DateTimeImmutable($value))->format('h:i A') : '—';
 }
 
+/** Calcula las horas y minutos entre la entrada y la salida. */
 function hours_view(?string $start, ?string $end): string
 {
     if (!$start || !$end) {

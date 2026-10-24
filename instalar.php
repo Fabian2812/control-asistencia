@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
+// Solo permite crear el primer administrador cuando la tabla usuarios está vacía.
 if ((int)db()->query('SELECT COUNT(*) FROM usuarios')->fetchColumn() > 0) {
     redirect('login.php');
 }
@@ -19,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $pdo = db();
         try {
+            // El bloqueo MySQL impide que dos solicitudes creen administradores a la vez.
             $locked = (int)$pdo->query("SELECT GET_LOCK('control_asistencia_instalacion', 5)")->fetchColumn();
             if ($locked !== 1) {
                 throw new RuntimeException('No fue posible bloquear la instalación.');
@@ -26,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ((int)$pdo->query('SELECT COUNT(*) FROM usuarios')->fetchColumn() > 0) {
                 redirect('login.php');
             }
+            // Solo se guarda el hash de la contraseña; nunca el texto original.
             $stmt = $pdo->prepare('INSERT INTO usuarios (nombre, usuario, password, estado) VALUES (?, ?, ?, 1)');
             $stmt->execute([$nombre, $usuario, password_hash($password, PASSWORD_DEFAULT)]);
             flash('success', 'Administrador creado. Ya puede iniciar sesión.');

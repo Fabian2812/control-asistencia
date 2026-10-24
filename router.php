@@ -1,13 +1,15 @@
 <?php
 declare(strict_types=1);
-// Router de desarrollo: bloquea archivos de configuración y código interno.
+// Router del servidor PHP de desarrollo: bloquea configuración y código interno.
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = rawurldecode($path);
+// Impide acceder a archivos ocultos, SQL, README y a la carpeta includes.
 if (str_contains($path, '..') || preg_match('~(^|/)(\.|includes/|database\.sql$|README\.md$|router\.php$)~i', $path)) {
     http_response_code(404);
     exit('No encontrado.');
 }
 if ($path === '/') {
+    // La raíz del sitio muestra el formulario de marcación pública.
     require __DIR__ . '/index.php';
     return true;
 }

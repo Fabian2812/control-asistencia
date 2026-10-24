@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
+/** Abre la página HTML, carga Bootstrap y dibuja el menú según el tipo de usuario. */
 function page_start(string $title, bool $admin = false): void
 {
     $flash = take_flash();
@@ -17,9 +18,9 @@ function page_start(string $title, bool $admin = false): void
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark app-nav">
+<nav class="navbar navbar-expand-lg navbar-light app-nav">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="<?= $admin ? 'dashboard.php' : 'index.php' ?>">◷ Asistencia</a>
+    <a class="navbar-brand fw-bold" href="<?= $admin ? 'dashboard.php' : 'index.php' ?>"><span class="brand-mark" aria-hidden="true">◷</span><span>Asistencia</span></a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="navMain">
       <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
@@ -44,6 +45,7 @@ function page_start(string $title, bool $admin = false): void
 <?php
 }
 
+/** Cierra el contenido y agrega el pie de página y JavaScript de Bootstrap. */
 function page_end(): void
 {
     ?>

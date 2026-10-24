@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
 
+// La pantalla es pública: solo solicita cédula y código, sin sesión administrativa.
 $error = null;
 $result = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $now = new DateTimeImmutable();
                 $fecha = $now->format('Y-m-d');
                 $hora = $now->format('Y-m-d H:i:s');
+                // La última asistencia de hoy determina si toca cerrar turno o abrir otro.
                 $stmt = $pdo->prepare('SELECT id, hora_entrada, hora_salida FROM asistencias WHERE empleado_id = ? AND fecha = ? ORDER BY id DESC LIMIT 1 FOR UPDATE');
                 $stmt->execute([$empleado['id'], $fecha]);
                 $ultima = $stmt->fetch();
@@ -42,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $result = ['nombre' => $empleado['nombre'], 'fecha' => $fecha, 'hora' => $hora, 'tipo' => $tipo];
             }
+            // La transacción confirma la marca antes de mostrar el resultado.
             $pdo->commit();
             if ($result) {
                 $_SESSION['mark_result'] = $result;
@@ -56,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 } elseif (isset($_SESSION['mark_result'])) {
+    // Muestra una sola vez el resultado guardado tras la redirección POST/GET.
     $result = $_SESSION['mark_result'];
     unset($_SESSION['mark_result']);
 }

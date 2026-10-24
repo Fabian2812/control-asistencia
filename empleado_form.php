@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
 require_admin();
+// Un ID en la URL activa la edición; sin ID se presenta el formulario de alta.
 $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
 if (isset($_GET['id']) && !$id) {
     http_response_code(400);
@@ -20,6 +21,7 @@ if ($id) {
 $values = $empleado ?: ['cedula' => '', 'nombre' => '', 'correo' => '', 'telefono' => '', 'estado' => 1];
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Normaliza los campos y valida longitud, formato y estado antes de escribir.
     verify_csrf();
     foreach (['cedula', 'nombre', 'correo', 'telefono'] as $field) {
         $values[$field] = trim((string)($_POST[$field] ?? ''));
@@ -44,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Seleccione un estado válido.';
     }
     if (!$errors) {
+        // Comprueba si la cédula pertenece ya a otro empleado.
         $stmt = db()->prepare('SELECT id FROM empleados WHERE cedula = ? AND id <> ? LIMIT 1');
         $stmt->execute([$values['cedula'], $id ?: 0]);
         if ($stmt->fetch()) {
@@ -53,11 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         try {
             if ($id) {
+                // Editar conserva el código asignado al registrar al empleado.
                 $stmt = db()->prepare('UPDATE empleados SET cedula = ?, nombre = ?, correo = ?, telefono = ?, estado = ? WHERE id = ?');
                 $stmt->execute([$values['cedula'], $values['nombre'], $values['correo'], $values['telefono'], (int)$values['estado'], $id]);
                 flash('success', 'Empleado actualizado correctamente.');
             } else {
-                // El índice UNIQUE garantiza la unicidad incluso con altas simultáneas.
+                // Genera seis caracteres aleatorios; el índice UNIQUE permite reintentar colisiones.
                 $created = false;
                 for ($attempt = 0; $attempt < 10; $attempt++) {
                     $codigo = strtoupper(bin2hex(random_bytes(3)));

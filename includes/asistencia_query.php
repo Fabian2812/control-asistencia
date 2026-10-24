@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
+/** Valida filtros GET y devuelve valores, errores, SQL WHERE y parámetros PDO. */
 function attendance_filters(array $input): array
 {
     $values = [];
@@ -22,6 +23,7 @@ function attendance_filters(array $input): array
     if ($values['desde'] !== '' && $values['hasta'] !== '' && $values['desde'] > $values['hasta']) {
         $errors[] = 'La fecha inicial debe ser anterior o igual a la fecha final.';
     }
+    // Las condiciones usan marcadores: el texto ingresado no se concatena al SQL.
     $where = [];
     $params = [];
     if ($values['empleado'] !== '') {

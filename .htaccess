@@ -1,7 +1,9 @@
+# Impide listar carpetas y descargar configuración o documentación interna.
 Options -Indexes
 <FilesMatch "^(\.env|\.env\.example|database\.sql|README\.md|\.gitignore|\.htaccess|router\.php)$">
     Require all denied
 </FilesMatch>
 RewriteEngine On
+# includes contiene funciones PHP, no páginas públicas.
 RewriteRule ^includes/ - [F,L]
 

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/layout.php';
+// Si todavía no existe administrador, conduce a la configuración inicial.
 if (!empty($_SESSION['admin_id'])) {
     redirect('dashboard.php');
 }
@@ -10,6 +11,7 @@ if ($count === 0) {
 }
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verifica credenciales con el hash guardado y limita intentos por sesión.
     verify_csrf();
     $usuario = trim((string)($_POST['usuario'] ?? ''));
     $password = (string)($_POST['password'] ?? '');
@@ -23,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$usuario]);
         $admin = $stmt->fetch();
         if ($admin && (int)$admin['estado'] === 1 && password_verify($password, $admin['password'])) {
+            // Renueva el ID de sesión al iniciar para evitar fijación de sesión.
             session_regenerate_id(true);
             $_SESSION['admin_id'] = (int)$admin['id'];
             $_SESSION['admin_nombre'] = $admin['nombre'];
